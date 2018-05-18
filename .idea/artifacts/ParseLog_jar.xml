@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ParseLog:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/parseLog</output-path>
+    <root id="archive" name="ParseLog.jar">
+      <element id="module-output" name="ParseLog" />
+      <element id="library" level="project" name="Maven: com.alibaba:fastjson:1.2.47" />
+    </root>
+  </artifact>
+</component>

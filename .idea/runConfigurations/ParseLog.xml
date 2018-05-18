@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ParseLog" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="cn.leadeon.spark.jsonParse.ParseLog" />
+    <module name="ParseLog" />
+    <option name="PROGRAM_PARAMETERS" value="hdfs://hadoop1:8020/data/bos-test/ hdfs://hadoop1:8020/data/output/ 20180507 BOS_NEWPLANMAT_CATE_DTL serialNumber,bizCode,billCycleEndDate,billCycleStartDate,callList_tmemRecord_tmemRecord_commFee,callList_tmemRecord_tmemRecord_commMode,callList_tmemRecord_tmemRecord_commPlac,callList_tmemRecord_tmemRecord_commTime,callList_tmemRecord_tmemRecord_commTimeH5,callList_tmemRecord_tmemRecord_commType,callList_tmemRecord_tmemRecord_eachOtherNm,callList_tmemRecord_tmemRecord_mealFavorable,callList_tmemRecord_tmemRecord_startTime,messageList_tmemRecord_tmemRecord_bunessName,messageList_tmemRecord_tmemRecord_commFee,messageList_tmemRecord_tmemRecord_commMode,messageList_tmemRecord_tmemRecord_commPlac,messageList_tmemRecord_tmemRecord_eachOtherNm,messageList_tmemRecord_tmemRecord_infoType,messageList_tmemRecord_tmemRecord_meal,messageList_tmemRecord_tmemRecord_startTime,netPlayList_tmemRecord_tmemRecord_commFee,netPlayList_tmemRecord_tmemRecord_commPlac,netPlayList_tmemRecord_tmemRecord_commTime,netPlayList_tmemRecord_tmemRecord_meal,netPlayList_tmemRecord_tmemRecord_netPlayType,netPlayList_tmemRecord_tmemRecord_netType,netPlayList_tmemRecord_tmemRecord_startTime,netPlayList_tmemRecord_tmemRecord_sumFlow,otime,tmemType,totalCount" />
+    <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="cn.leadeon.spark.jsonParse.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <shortenClasspath name="NONE" />
+    <method />
+  </configuration>
+</component>
