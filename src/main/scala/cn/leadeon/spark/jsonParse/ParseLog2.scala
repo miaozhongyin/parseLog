@@ -44,12 +44,13 @@ object ParseLog2 {
       // add new fields
       jsonObj.put("serialNumber", serialNumber)
       jsonObj.put("bizCode", bizCode)
-      val logClean3 = new ParseLog2()
-      val recursJson  = logClean3.recursionJSON(jsonObj)
+      val logClean2 = new ParseLog2()
+      //
+      val recursJson  = logClean2.recursionJSON(jsonObj)
       val map = new util.HashMap[String,Object]()
-      logClean3.parseJSON(recursJson.asInstanceOf[JSONObject],map)
+      logClean2.parseJSON(recursJson.asInstanceOf[JSONObject],map)
       import collection.JavaConversions._
-      for{ jsonObj :JSONObject <- logClean3.resultList} yield {
+      for{ jsonObj :JSONObject <- logClean2.resultList} yield {
         val returnJson = JSON.toJSONString(jsonObj,SerializerFeature.WriteMapNullValue)
         returnJson
       }
@@ -92,7 +93,7 @@ object ParseLog2 {
   }
 
   /**
-    * if DateFrame contain Struct type fields ,we will use lateral view outer function to explode struct fileds to mutilable rows
+    *
     * @param sQLContext
     * @param jsonDF
     * @param tabName

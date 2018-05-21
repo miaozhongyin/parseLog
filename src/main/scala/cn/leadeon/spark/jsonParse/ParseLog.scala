@@ -11,6 +11,10 @@ import org.apache.spark.sql.{Column, DataFrame, SQLContext, SaveMode}
 import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.collection.mutable.ListBuffer
+
+/**
+  *  ParseLog 主要实现解析log 中的JSON 数据，并将最终需要的字段写入到指定的hive 目录下。
+  */
 object ParseLog {
   def main(args: Array[String]) {
     if (args.length !=5 ) {
@@ -30,6 +34,7 @@ object ParseLog {
     val hiveContext = new HiveContext(sc)
     val sql = "select "+fields + " from " + tableName
     val hdfsRDD = sc.textFile(intPutPath).cache()
+    // 完成jSON 数据 解析为多行记录功能
     val jsonRDD   = hdfsRDD.map(_.split("\\|\\#\\$"))
       .filter(splits => splits.size==3)
       .map(splits => {
@@ -44,6 +49,7 @@ object ParseLog {
       val recursJson  = logClean3.recursionJSON(jsonObj)
       val map = new util.HashMap[String,Object]()
       logClean3.parseJSON(recursJson.asInstanceOf[JSONObject],map)
+      // for 语句中返回的时每条JSON 数据解析后的 多条记录List，在flatMap 中依次将该list 展平为单行JSON记录
       import collection.JavaConversions._
       for{ jsonObj :JSONObject <- logClean3.resultList} yield {
         val returnJson = JSON.toJSONString(jsonObj,SerializerFeature.WriteMapNullValue)
@@ -51,9 +57,12 @@ object ParseLog {
       }
     }).filter(_.size>0).flatMap(list => list)
     val jsonDF = hiveContext.read.json(jsonRDD)
+    // 检查jsonDF 中是否包含 StructType 数据类型。该过程可以根据具体需求来决定是否调用。
     val explodeDF = checkSchema(hiveContext,jsonDF)
     explodeDF.registerTempTable(tableName)
+    // 通过传入的json字段，对DataFrame 中的数据进行筛选。
     val outPutDF = hiveContext.sql(sql)
+    // 输出结果到hive 中
     outPutDF.write.mode(SaveMode.Overwrite).orc(outPutPath)
 //    hdfsRDD.map(_.split("\\|\\#\\$"))
 //      .filter(splits => splits.size !=3)
@@ -86,6 +95,18 @@ object ParseLog {
       }
     })
   }
+
+  /**
+    * 调用 hive 中的 lateral view 语句展开 dataFrame 中的数组列为多行记录，类似spark 中的 explode 函数，但explode 函数在
+    * sql 语句中只能使用一次，不能同时平级的展开多个数组列，所以选择hive 语句中的lateral view 。有关lateral view 更详细用法查看有关
+    * 文档。
+    * 经生产环境大量数据测试，该 函数的在处理大量数据时，需要占用较大的内存空间，且数据处理主要发生在Drive 端，给driver 端节点性能
+    * 带来较大压力，建议应减少对该语句的调用，或在最后需要该功能时调用。
+    * @param sQLContext
+    * @param jsonDF
+    * @param tabName
+    * @return new DataFrame ，can't contain ArrayType column
+    */
   def explodeSchema1(sQLContext: SQLContext,jsonDF :DataFrame,tabName:String) :DataFrame = {
     val dataTypes = jsonDF.dtypes
     val explodeSQL =  new ListBuffer[String]()
@@ -103,7 +124,7 @@ object ParseLog {
   }
 
   /**
-    *
+    *检查 DataFrame 中是否包含Array or StructType 类型。并根据DataFrame 中 Array or StructType 类型调用不同的函数展开对应的列。
     * @param sQLContext
     * @param orgDF
     * @param nameCount
@@ -135,7 +156,8 @@ class ParseLog{
   val resultList = new util.ArrayList[JSONObject]()
 
   /**
-    * append father node name for child node by recurse JSON object
+    * 该函数通过递归方法，给json 中的所有子节点增加父节点名称，消除json 中的同名节点。
+    * 可以根据具体情况来决定是否调用该方法。
     * @param jsonObject  source json object
     * @param prefix      father node name ,root node prefix is ""
     * @return            target json boject
@@ -172,7 +194,8 @@ class ParseLog{
   }
 
   /**
-    * explode json into rows
+    * 该方法为递归方法，用于解析json 数据为多行记录，实现explode 功能，
+    * 需要注意，当叶子节点为DataFrame 中的StructType 时(or java Map类型)，默认为JSONObject 类型返回。
     * @param jSONObject  source json Object
     * @param hashMap     map is used to store row
     * @return            explode rows stored use list
